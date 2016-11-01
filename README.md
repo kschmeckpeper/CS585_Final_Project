@@ -1,6 +1,6 @@
 # CS585_Final_Project
 
-I haven't been able to get this to run in a windows environment, but Ubuntu works fine
+I haven't tested this in windows or mac, but Ubuntu works fine
 
 Install
 

@@ -82,29 +82,29 @@ def tag(text):
 # Hash function for week days to simplify the grounding task.
 # [Mon..Sun] -> [0..6]
 hashweekdays = {
-    'Monday': 0,
-    'Tuesday': 1,
-    'Wednesday': 2,
-    'Thursday': 3,
-    'Friday': 4,
-    'Saturday': 5,
-    'Sunday': 6}
+    'monday': 0,
+    'tuesday': 1,
+    'wednesday': 2,
+    'thursday': 3,
+    'friday': 4,
+    'saturday': 5,
+    'sunday': 6}
 
 # Hash function for months to simplify the grounding task.
 # [Jan..Dec] -> [1..12]
 hashmonths = {
-    'January': 1,
-    'February': 2,
-    'March': 3,
-    'April': 4,
-    'May': 5,
-    'June': 6,
-    'July': 7,
-    'August': 8,
-    'September': 9,
-    'October': 10,
-    'November': 11,
-    'December': 12}
+    'january': 1,
+    'february': 2,
+    'march': 3,
+    'april': 4,
+    'may': 5,
+    'june': 6,
+    'july': 7,
+    'august': 8,
+    'september': 9,
+    'october': 10,
+    'november': 11,
+    'december': 12}
 
 # Hash number in words into the corresponding integer value
 def hashnum(number):
@@ -241,18 +241,24 @@ def extract_dates(text, base_date):
 
         # Weekday in the previous week.
         elif re.match(r'last ' + week_day, timex, re.IGNORECASE):
-            day = hashweekdays[timex.split()[1]]
-            timex_val = str(base_date + timedelta(weeks=-1, weekday=(day,0)))
+            day = hashweekdays[timex.split()[1].lower()]
+            curr_day = base_date.weekday()
+            timex_val = str(base_date + timedelta(days=-7+(day-curr_day)%7))
+            print timex, day, curr_day, base_date, timex_val, (-7+(day-curr_day)%7)
 
         # Weekday in the current week.
         elif re.match(r'this ' + week_day, timex, re.IGNORECASE):
-            day = hashweekdays[timex.split()[1]]
-            timex_val = str(base_date + timedelta(weeks=0, weekday=(day,0)))
+            day = hashweekdays[timex.split()[1].lower()]
+            curr_day = base_date.weekday()
+            timex_val = str(base_date + timedelta(days=(day-curr_day)%7))
+            print timex, day, curr_day, base_date, timex_val, ((day-curr_day)%7)
 
         # Weekday in the following week.
         elif re.match(r'next ' + week_day, timex, re.IGNORECASE):
-            day = hashweekdays[timex.split()[1]]
-            timex_val = str(base_date + timedelta(weeks=+1, weekday=(day,0)))
+            day = hashweekdays[timex.split()[1].lower()]
+            curr_day = base_date.weekday()
+            timex_val = str(base_date + timedelta(days=7+(day-curr_day)%7))
+            print timex, day, curr_day, base_date, timex_val, ((day-curr_day)%7)
 
         # Last, this, next week.
         elif re.match(r'last week', timex, re.IGNORECASE):
@@ -273,17 +279,17 @@ def extract_dates(text, base_date):
 
         # Month in the previous year.
         elif re.match(r'last ' + month, timex, re.IGNORECASE):
-            month = hashmonths[timex.split()[1]]
+            month = hashmonths[timex.split()[1].lower()]
             timex_val = str(base_date.year - 1) + '-' + str(month)
 
         # Month in the current year.
         elif re.match(r'this ' + month, timex, re.IGNORECASE):
-            month = hashmonths[timex.split()[1]]
+            month = hashmonths[timex.split()[1].lower()]
             timex_val = str(base_date.year) + '-' + str(month)
 
         # Month in the following year.
         elif re.match(r'next ' + month, timex, re.IGNORECASE):
-            month = hashmonths[timex.split()[1]]
+            month = hashmonths[timex.split()[1].lower()]
             timex_val = str(base_date.year + 1) + '-' + str(month)
         elif re.match(r'last month', timex, re.IGNORECASE):
 
@@ -388,8 +394,8 @@ def demo():
 
 if __name__ == '__main__':
     # print len(nltk.corpus.abc.raw('rural.txt'))
-    text = nltk.corpus.abc.raw('rural.txt')[:50000]
+    text = nltk.corpus.abc.raw('rural.txt')
 
-    basedate = parse("Friday")
+    basedate = parse("Wednesday")
     (tagged_text, dates) = extract_dates(text, basedate)
     print dates
