@@ -230,7 +230,7 @@ def extract_dates(text, base_date):
         # Specific dates
         elif re.match(r'\d{4}', timex):
             timex_val = str(timex)
-            print "1", timex_val
+            # print "1", timex_val
 
         # Relative dates
         elif re.match(r'tonight|tonite|today', timex, re.IGNORECASE):
