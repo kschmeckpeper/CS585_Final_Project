@@ -10,7 +10,7 @@ def read_reuters(path):
             files = open(path + filename).read().strip()
             if files.find("<BODY>") != -1:
                 d_start = files.find("<DATE>")
-                d_end = files.find("</DATE")
+                d_end = files.find("</DATE>")
                 dt = files[d_start:d_end]
                 date = re.search("(\d+)-(\w+)-(\d+)", dt).group(0)
                 day = re.search("(\d+)", date).group(0)
@@ -43,12 +43,13 @@ def read_reuters(path):
                     month = 12
                 obj = datetime.date(year, month, int(day))
                 c_start = files.find("<BODY>")
-                c_end = files.find("Reuter")
+                c_end = files.find("</REUTERS>")
                 body = files[c_start:c_end]
                 content = body[6:]
                 pairs.append((obj, content))
+                files = files[c_end:]
     return pairs
 
 if __name__ == '__main__':
-    pairs = read_reuters('reuters/')
+    pairs = read_reuters('/Users/EvanReiff/Desktop/Senior 1/CMPSCI 585/Project/reuters21578/')
     print pairs
