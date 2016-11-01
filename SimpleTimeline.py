@@ -2,8 +2,8 @@ import DateEventPair
 import timex
 from collections import Counter
 
-if __name__ == '__main__':
-	pairs = DateEventPair.read_reuters('reuters/')
+def select_best_dates(path, num_dates=None):
+	pairs = DateEventPair.read_reuters(path)
 	
 	date_counter = Counter()
 
@@ -13,5 +13,13 @@ if __name__ == '__main__':
 		for date in dates:
 			date_counter[date] += 1
 
-	print date_counter.most_common()
+	if num_dates	== None:
+		return date_counter.most_common()
+	else:
+		return date_counter.most_common(num_dates)
+
+if __name__ == '__main__':
+
+	print select_best_dates('reuters/')
+	
 	
