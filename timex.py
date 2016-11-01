@@ -244,6 +244,7 @@ def extract_dates(text, base_date):
             day = hashweekdays[timex.split()[1].lower()]
             curr_day = base_date.weekday()
             timex_val = str(base_date + timedelta(days=-7+(day-curr_day)%7))
+            print "Weekdays may not behave as desired"
             print timex, day, curr_day, base_date, timex_val, (-7+(day-curr_day)%7)
 
         # Weekday in the current week.
@@ -251,6 +252,7 @@ def extract_dates(text, base_date):
             day = hashweekdays[timex.split()[1].lower()]
             curr_day = base_date.weekday()
             timex_val = str(base_date + timedelta(days=(day-curr_day)%7))
+            print "Weekdays may not behave as desired"
             print timex, day, curr_day, base_date, timex_val, ((day-curr_day)%7)
 
         # Weekday in the following week.
@@ -258,6 +260,7 @@ def extract_dates(text, base_date):
             day = hashweekdays[timex.split()[1].lower()]
             curr_day = base_date.weekday()
             timex_val = str(base_date + timedelta(days=7+(day-curr_day)%7))
+            print "Weekdays may not behave as desired"
             print timex, day, curr_day, base_date, timex_val, ((day-curr_day)%7)
 
         # Last, this, next week.
