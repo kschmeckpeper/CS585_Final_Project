@@ -2,6 +2,6 @@
 
 I haven't tested this in windows or mac, but Ubuntu works fine
 
-Install
+## Install
 
 sudo pip install nltk
