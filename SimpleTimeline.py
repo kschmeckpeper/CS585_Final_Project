@@ -5,7 +5,25 @@ import datetime
 import DateEventPair
 import timex
 
-def select_best_dates(path, num_dates=None, use_article_date=1):
+def remove_invalid_dates(filter, string, counter):
+    """ Checks to see if the date string is valid.
+    If the string is valid, adds 1 to that key in the counter
+
+    If filter is false, will not check if the string is valid
+
+    Currently only checks to see if year is in the correct range
+    """
+    if not filter:
+        counter[string] += 1
+    else:
+        try:
+            date = int(string[0:4])
+            if 1900 < date and date < 2100:
+                counter[string] += 1
+        except ValueError:
+            pass
+
+def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=False):
     """ Returns an ordered list of the most common dates
     in the files containted in the path.
 
@@ -23,10 +41,10 @@ def select_best_dates(path, num_dates=None, use_article_date=1):
         (tagged_text, dates) = timex.extract_dates(pair[1], pair[0])
         
         if use_article_date == 2 or (use_article_date == 1 and len(dates) == 0):
-            date_counter["%s" % (pair[0].date())] += 1
+            remove_invalid_dates(filter_dates, "%s" % (pair[0].date()), date_counter)
 
         for date in dates:
-            date_counter[date] += 1
+            remove_invalid_dates(filter_dates, date, date_counter)
 
     if num_dates is None:
         return date_counter.most_common()
@@ -35,4 +53,4 @@ def select_best_dates(path, num_dates=None, use_article_date=1):
 
 if __name__ == '__main__':
 
-    print select_best_dates('reuters/')
+    print select_best_dates('reuters/', filter_dates=True)
