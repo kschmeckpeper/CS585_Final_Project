@@ -1,5 +1,7 @@
 """Functions for calculating timelines based on counting"""
 from collections import Counter
+from dateutil.parser import parse
+import datetime
 import DateEventPair
 import timex
 
@@ -14,14 +16,8 @@ def select_best_dates(path, num_dates=None):
 
     for pair in pairs:
         (tagged_text, dates) = timex.extract_dates(pair[1], pair[0])
-
-        month = pair[0].month()
-        if len(month) == 1:
-            month = "0" + month
-        day = pair[0].day()
-        if len(day) == 1:
-            day = "0" + day
-        date_counter["%s-%s-%s" % (pair[0].year(), month, day)] += 1
+        
+        date_counter["%s" % (pair[0].date())] += 1
         for date in dates:
             date_counter[date] += 1
 
