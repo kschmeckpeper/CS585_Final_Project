@@ -41,6 +41,14 @@ def remove_invalid_dates(should_filter, string, counter):
         except ValueError:
             pass
 
+def summarize(sentences):
+    """ Dummy summarization method.  
+    Returns the first sentence
+
+    Replace with actual summarization
+    """
+    return sentences[0]
+
 def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=False):
     """ Returns an ordered list of the most common dates and a 1 sentence summary
     in the files containted in the path.
@@ -55,10 +63,7 @@ def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=Fal
 
     date_counter = Counter()
 
-
-    # Summary is currently found by taking the sentence surrounding the
-    # last mention of each date
-    basic_summaries = {}
+    sentence_list = {}
 
     for pair in pairs:
         dates = timex.extract_dates(pair[1], pair[0])
@@ -68,7 +73,10 @@ def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=Fal
 
         for date in dates:
             remove_invalid_dates(filter_dates, date[0], date_counter)
-            basic_summaries[date[0]] = date[1]
+            if date[0] not in sentence_list:
+                sentence_list[date[0]] = []
+            sentence_list[date[0]].append(date[1])
+            
 
     dates_to_return = date_counter.most_common()
 
@@ -78,7 +86,7 @@ def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=Fal
     date_with_summarization = []
 
     for date in dates_to_return:
-        date_with_summarization.append((date[0], date[1], basic_summaries[date[0]]))
+        date_with_summarization.append((date[0], date[1], summarize(sentence_list[date[0]])))
 
     return date_with_summarization
 
