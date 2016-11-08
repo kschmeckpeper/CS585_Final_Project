@@ -5,6 +5,26 @@ import datetime
 import DateEventPair
 import timex
 
+def add_date(string, counter, timespan=0):
+    """ Adds the date to the counter
+    Timespan defines the timespan that the timeline is using
+    0 - Days
+    1 - Weeks
+    2 - Months
+    3 - Years
+
+    add_date will remove all dates with less precision,
+    and put all dates with more precision into the correct bin
+    """
+
+    if timespan == 0:
+        # Only use the strings with the day specified
+        if len(string) == 10:
+            counter[string] += 1
+    else:
+        print "Timespans of weeks, months, and years are not implemented yet"
+
+
 def remove_invalid_dates(filter, string, counter):
     """ Checks to see if the date string is valid.
     If the string is valid, adds 1 to that key in the counter
@@ -19,7 +39,7 @@ def remove_invalid_dates(filter, string, counter):
         try:
             date = int(string[0:4])
             if 1900 < date and date < 2100:
-                counter[string] += 1
+                add_date(string, counter)
         except ValueError:
             pass
 
