@@ -1,7 +1,10 @@
 """Functions for calculating timelines based on counting"""
 from collections import Counter
+from collections import defaultdict
 import DateEventPair
 import timex
+import re
+from nltk.tokenize import word_tokenize
 
 def add_date(string, counter, timespan=0):
     """ Adds the date to the counter
@@ -42,11 +45,6 @@ def remove_invalid_dates(should_filter, string, counter):
             pass
 
 def summarize(sentences):
-    """ Dummy summarization method.  
-    Returns the first sentence
-
-    Replace with actual summarization
-    """
     return sentences[0]
 
 def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=False):
@@ -60,6 +58,7 @@ def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=Fal
     """
 
     pairs = DateEventPair.read_reuters(path)
+    count_word_word_matrix(pairs)
 
     date_counter = Counter()
 
@@ -76,7 +75,6 @@ def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=Fal
             if date[0] not in sentence_list:
                 sentence_list[date[0]] = []
             sentence_list[date[0]].append(date[1])
-            
 
     dates_to_return = date_counter.most_common()
 
@@ -89,6 +87,41 @@ def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=Fal
         date_with_summarization.append((date[0], date[1], summarize(sentence_list[date[0]])))
 
     return date_with_summarization
+
+def count_word_word_matrix(corpus, dist=7):
+    """ Returns a dictionary of dictionaries, both indexed on words
+    Each of the secondary dictionaries should contain the number of
+    times that the current key occurs near the key for the entire
+    dictionary in the training corpus.
+    """
+    
+    matrix = {}
+    is_number = re.compile("\d")
+
+    for article_index in range(len(corpus)):
+        tokens = word_tokenize(corpus[article_index][1])
+        for count in range(len(tokens)):
+            word = tokens[count].lower()
+            if bool(is_number.search(word)):
+                word = "<NUMBER>"
+
+            if word not in matrix:
+                matrix[word] = defaultdict(int)
+            low = count-dist
+            high = count+dist
+            tmp = low
+            while tmp <= high:
+                if tmp < 0:
+                    matrix[word][" "] += 1
+                elif tmp >= len(tokens):
+                    matrix[word][" "] += 1
+                else:
+                    if bool(is_number.search(tokens[tmp])):
+                        matrix[word]["<NUMBER>"] += 1
+                    else:
+                        matrix[word][tokens[tmp].lower()] += 1
+                tmp += 1
+    return matrix
 
 if __name__ == '__main__':
 

@@ -166,7 +166,7 @@ def hashnum(number):
 # Both use the same format of strings to describe dates
 #   The strings describing the dates may have different formats based on how
 #   accurate they are.
-#   EX. 
+#   EX.
 #       '2002' is accurate to the nearest year, for instance from the phrase 'last year'
 #       '2016-10' is accurate to the nearest month
 #       '2016W42' is accurate to the nearest week
@@ -179,7 +179,6 @@ def extract_dates(text, base_date):
     dates = []
 
     tagged_text = tag(text)
-    
     sentence_detector = nltk.data.load('tokenizers/punkt/english.pickle')
 
     sentences = sentence_detector.tokenize(tagged_text.strip())
@@ -217,7 +216,6 @@ def extract_dates(text, base_date):
                                               value, re.IGNORECASE))
                 timex = `sum(num_list)` + ' ' + unit
 
-            
             # If timex matches ISO format, remove 'time' and reorder 'date'
             if re.match(r'\d+[/-]\d+[/-]\d+ \d+:\d+:\d+\.\d+', timex):
                 dmy = re.split(r'\s', timex)[0]
