@@ -5,6 +5,7 @@ import DateEventPair
 import timex
 import re
 from nltk.tokenize import word_tokenize
+import math
 
 def add_date(string, counter, timespan=0):
     """ Adds the date to the counter
@@ -87,16 +88,17 @@ def calc_word_similarity(first_word, second_word, matrix):
     if first_word not in matrix or second_word not in matrix:
         return 0
 
-    first_dot_second = 0.0
-    first_length = 0.0
+    first_dot_second = sum([matrix[first_word][k]*matrix[second_word][k] for k in matrix[first_word] if k in matrix[second_word]]) if len(matrix[first_word])<len(matrix[second_word]) else sum([matrix[first_word][k]*matrix[second_word][k] for k in matrix[second_word] if k in matrix[first_word]])
+    first_length = math.sqrt(sum(matrix[first_word][k]**2 for k in matrix[first_word]))
+    second_length = math.sqrt(sum(matrix[second_word][k]**2 for k in matrix[second_word]))
 
-    for key in matrix[first_word]:
-        first_dot_second += matrix[first_word][key] * matrix[second_word][key]
-        first_length += matrix[first_word][key]**2
+    # for key in matrix[first_word]:
+    #     # first_dot_second += matrix[first_word][key] * matrix[second_word][key]
+    #     first_length += matrix[first_word][key]**2
 
-    second_length = 0.0
-    for key in matrix[second_word]:
-        second_length += matrix[second_word][key]**2
+    # second_length = 0.0
+    # for key in matrix[second_word]:
+    #     second_length += matrix[second_word][key]**2
 
     return first_dot_second / (first_length * second_length)
 
@@ -182,4 +184,4 @@ def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=Fal
 
 if __name__ == '__main__':
 
-    print select_best_dates('reuters/', filter_dates=True)
+    print select_best_dates('test/', filter_dates=True)
