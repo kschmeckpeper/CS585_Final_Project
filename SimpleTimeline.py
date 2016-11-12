@@ -44,8 +44,100 @@ def remove_invalid_dates(should_filter, string, counter):
         except ValueError:
             pass
 
-def summarize(sentences):
-    return sentences[0]
+def count_word_word_matrix(corpus, dist=7):
+    """ Returns a dictionary of dictionaries, both indexed on words
+    Each of the secondary dictionaries should contain the number of
+    times that the current key occurs near the key for the entire
+    dictionary in the training corpus.
+    """
+    
+    matrix = {}
+    is_number = re.compile("\d")
+
+    for article_index in range(len(corpus)):
+        tokens = word_tokenize(corpus[article_index][1])
+        for count in range(len(tokens)):
+            word = tokens[count].lower()
+            
+            if bool(is_number.search(word)):
+                word = "<NUMBER>"
+
+            if word not in matrix:
+                matrix[word] = defaultdict(int)
+            low = count-dist
+            high = count+dist
+            tmp = low
+            while tmp <= high:
+                if tmp < 0:
+                    matrix[word][" "] += 1
+                elif tmp >= len(tokens):
+                    matrix[word][" "] += 1
+                else:
+                    if bool(is_number.search(tokens[tmp])):
+                        matrix[word]["<NUMBER>"] += 1
+                    else:
+                        matrix[word][tokens[tmp].lower()] += 1
+                tmp += 1
+    return matrix
+
+def calc_word_similarity(first_word, second_word, matrix):
+    first_word = first_word.lower()
+    second_word = second_word.lower()
+    
+    if first_word not in matrix or second_word not in matrix:
+        return 0
+
+    first_dot_second = 0.0
+    first_length = 0.0
+
+    for key in matrix[first_word]:
+        first_dot_second += matrix[first_word][key] * matrix[second_word][key]
+        first_length += matrix[first_word][key]**2
+
+    second_length = 0.0
+    for key in matrix[second_word]:
+        second_length += matrix[second_word][key]**2
+
+    return first_dot_second / (first_length * second_length)
+
+def calc_sentence_similarity(first_sentence, second_sentence, matrix):
+    first_tokens = word_tokenize(first_sentence)
+    second_tokens = word_tokenize(second_sentence)
+
+    total_similarity = 0.0
+
+    for token in first_tokens:
+        best_word_similarity = 0.0
+
+        for canidate in second_tokens:
+            similarity = calc_word_similarity(token, canidate, matrix)
+            if similarity > best_word_similarity:
+                best_word_similarity = similarity
+        total_similarity += best_word_similarity
+
+    return total_similarity / len(first_tokens)
+
+def summarize(sentences, matrix):
+
+    best_sentence_similarity = 0
+    best_sentence = ""
+    outer_count = 0
+    
+    for canidate_sentence in sentences:
+        print canidate_sentence
+        total_similarity = 0
+        count = 0
+        for sentence in sentences:
+            total_similarity += calc_sentence_similarity(canidate_sentence, sentence, matrix)
+            count += 1
+            print "Checked ", count, "/", len(sentences)
+
+        if total_similarity > best_sentence_similarity:
+            best_sentence = canidate_sentence
+            best_sentence_similarity = total_similarity
+        print "Outer count ", outer_count, "/", len(sentences)
+
+    return best_sentence
 
 def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=False):
     """ Returns an ordered list of the most common dates and a 1 sentence summary
@@ -58,8 +150,7 @@ def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=Fal
     """
 
     pairs = DateEventPair.read_reuters(path)
-    count_word_word_matrix(pairs)
-
+    matrix = count_word_word_matrix(pairs)
     date_counter = Counter()
 
     sentence_list = {}
@@ -84,44 +175,10 @@ def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=Fal
     date_with_summarization = []
 
     for date in dates_to_return:
-        date_with_summarization.append((date[0], date[1], summarize(sentence_list[date[0]])))
+        print date
+        date_with_summarization.append((date[0], date[1], summarize(sentence_list[date[0]], matrix)))
 
     return date_with_summarization
-
-def count_word_word_matrix(corpus, dist=7):
-    """ Returns a dictionary of dictionaries, both indexed on words
-    Each of the secondary dictionaries should contain the number of
-    times that the current key occurs near the key for the entire
-    dictionary in the training corpus.
-    """
-    
-    matrix = {}
-    is_number = re.compile("\d")
-
-    for article_index in range(len(corpus)):
-        tokens = word_tokenize(corpus[article_index][1])
-        for count in range(len(tokens)):
-            word = tokens[count].lower()
-            if bool(is_number.search(word)):
-                word = "<NUMBER>"
-
-            if word not in matrix:
-                matrix[word] = defaultdict(int)
-            low = count-dist
-            high = count+dist
-            tmp = low
-            while tmp <= high:
-                if tmp < 0:
-                    matrix[word][" "] += 1
-                elif tmp >= len(tokens):
-                    matrix[word][" "] += 1
-                else:
-                    if bool(is_number.search(tokens[tmp])):
-                        matrix[word]["<NUMBER>"] += 1
-                    else:
-                        matrix[word][tokens[tmp].lower()] += 1
-                tmp += 1
-    return matrix
 
 if __name__ == '__main__':
 

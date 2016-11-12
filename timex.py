@@ -370,11 +370,13 @@ def extract_dates(text, base_date):
             # timex_val = 2000-02-20
             timex_val = re.sub(r'\s.*', '', timex_val)
 
+            # dates.append((timex_val, sentence))
             # Substitute tag+timex in the text with grounded tag+timex.
-            sentence = re.sub('<TIMEX2>' + timex_ori + '</TIMEX2>', '<TIMEX2 val=\"' \
+            sentence_with_tags = re.sub('<TIMEX2>' + timex_ori + '</TIMEX2>', '<TIMEX2 val=\"' \
                 + timex_val + '\">' + timex_ori + '</TIMEX2>', sentence)
 
-            dates.append((timex_val, sentence))
+            dates.append((timex_val, sentence_with_tags))
+
 
     return dates
 
