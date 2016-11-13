@@ -68,16 +68,14 @@ def count_word_word_matrix(corpus, dist=7):
             low = count-dist
             high = count+dist
             tmp = low
-            while tmp <= high:
-                if tmp < 0:
-                    matrix[word][" "] += 1
-                elif tmp >= len(tokens):
-                    matrix[word][" "] += 1
+            if tmp < 0:
+                matrix[word][" "] -= tmp
+            matrix[word][" "] += (high - len(tokens)) + 1
+            while tmp < len(tokens):
+                if bool(is_number.search(tokens[tmp])):
+                    matrix[word]["<NUMBER>"] += 1
                 else:
-                    if bool(is_number.search(tokens[tmp])):
-                        matrix[word]["<NUMBER>"] += 1
-                    else:
-                        matrix[word][tokens[tmp].lower()] += 1
+                    matrix[word][tokens[tmp].lower()] += 1
                 tmp += 1
     return matrix
 
