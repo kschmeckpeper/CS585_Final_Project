@@ -1,11 +1,13 @@
 """Functions for calculating timelines based on counting"""
 from collections import Counter
 from collections import defaultdict
-import DateEventPair
+import DateArticlePair
 import timex
 import re
 from nltk.tokenize import word_tokenize
 import math
+
+import TextRank
 
 def add_date(string, counter, timespan=0):
     """ Adds the date to the counter
@@ -117,7 +119,7 @@ def calc_sentence_similarity(first_sentence, second_sentence, matrix):
 
     return total_similarity / len(first_tokens)
 
-def summarize(sentences, matrix):
+def summarize_by_word_similarity(sentences, matrix):
 
     best_sentence_similarity = 0
     best_sentence = ""
@@ -139,7 +141,10 @@ def summarize(sentences, matrix):
 
     return best_sentence
 
-def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=False):
+def summarize_with_TextRank(sentences, matrix):
+    return TextRank.extractSentencesFromSentenceTokens(sentences)
+
+def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=False, summarization_function=summarize_with_TextRank):
     """ Returns an ordered list of the most common dates and a 1 sentence summary
     in the files containted in the path.
 
@@ -149,23 +154,26 @@ def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=Fal
     2 - always use article date
     """
 
-    pairs = DateEventPair.read_reuters(path)
-    matrix = count_word_word_matrix(pairs)
+    date_article_pairs = DateArticlePair.read_reuters(path)
+
+    matrix = []
+    if summarization_function == summarize_by_word_similarity:
+        matrix = count_word_word_matrix(date_article_pairs)
     date_counter = Counter()
 
     sentence_list = {}
 
-    for pair in pairs:
-        dates = timex.extract_dates(pair[1], pair[0])
+    for (article_date, article_text) in date_article_pairs:
+        date_sentence_pairs = timex.extract_dates(article_text, article_date)
 
-        if use_article_date == 2 or (use_article_date == 1 and len(dates) == 0):
-            remove_invalid_dates(filter_dates, "%s" % (pair[0].date()), date_counter)
+        if use_article_date == 2 or (use_article_date == 1 and len(date_sentence_pairs) == 0):
+            remove_invalid_dates(filter_dates, "%s" % (article_date.date()), date_counter)
 
-        for date in dates:
-            remove_invalid_dates(filter_dates, date[0], date_counter)
-            if date[0] not in sentence_list:
-                sentence_list[date[0]] = []
-            sentence_list[date[0]].append(date[1])
+        for (date, sentence) in date_sentence_pairs:
+            remove_invalid_dates(filter_dates, date, date_counter)
+            if date not in sentence_list:
+                sentence_list[date] = []
+            sentence_list[date].append(sentence)
 
     dates_to_return = date_counter.most_common()
 
@@ -176,7 +184,7 @@ def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=Fal
 
     for date in dates_to_return:
         print date
-        date_with_summarization.append((date[0], date[1], summarize(sentence_list[date[0]], matrix)))
+        date_with_summarization.append((date[0], date[1], summarization_function(sentence_list[date[0]], matrix)))
 
     return date_with_summarization
 
