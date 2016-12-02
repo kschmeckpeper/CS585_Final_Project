@@ -1,6 +1,7 @@
 """Functions for calculating timelines based on counting"""
 from collections import Counter
 from collections import defaultdict
+from time import gmtime, strftime
 import DateArticlePair
 import timex
 import re
@@ -189,5 +190,11 @@ def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=Fal
     return date_with_summarization
 
 if __name__ == '__main__':
-
+	"""
+    fn = strftime("%H-%M-%S-%d%b%Y")+ "_output.txt"
+    fl = open(fn, "w")
+    fl.writelines("%s\n" % item for item in select_best_dates('test/', filter_dates=True))
+    fl.close()
+	-trying to make it write the output of the function to a file but getting a runtime error. 
+	"""
     print select_best_dates('test/', filter_dates=True)
