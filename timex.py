@@ -183,8 +183,19 @@ def extract_dates(text, base_date):
 
     sentences = sentence_detector.tokenize(tagged_text.strip())
 
-
     for sentence in sentences:
+        # Removes Tables and sentences that only describe stock movements with numbers
+        if ("       " in sentence or 
+                sentence[0:3] == "Shr" or 
+                sentence[0:9] == "Group shr" or 
+                sentence[0:4] == "Qtly" or 
+                sentence[0:5] == "Qtrly" or 
+                sentence[0:4] == "Oper" or 
+                sentence[0:4] == "Unit" or 
+                sentence[0:6].lower() == "reuter"):
+            continue
+
+
         # Find all identified timex and put them into a list
         timex_regex = re.compile(r'<TIMEX2>.*?</TIMEX2>', re.DOTALL)
         timex_found = timex_regex.findall(sentence)
