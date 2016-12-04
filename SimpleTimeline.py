@@ -9,6 +9,7 @@ from nltk.tokenize import word_tokenize
 import math
 
 import TextRank
+import FrequencySummarizer
 
 def add_date(string, counter, timespan=0):
     """ Adds the date to the counter
@@ -54,7 +55,7 @@ def count_word_word_matrix(corpus, dist=7):
     times that the current key occurs near the key for the entire
     dictionary in the training corpus.
     """
-    
+
     matrix = {}
     is_number = re.compile("\d")
 
@@ -62,7 +63,7 @@ def count_word_word_matrix(corpus, dist=7):
         tokens = word_tokenize(corpus[article_index][1])
         for count in range(len(tokens)):
             word = tokens[count].lower()
-            
+
             if bool(is_number.search(word)):
                 word = "<NUMBER>"
 
@@ -84,12 +85,12 @@ def count_word_word_matrix(corpus, dist=7):
 def calc_word_similarity(first_word, second_word, matrix):
     first_word = first_word.lower()
     second_word = second_word.lower()
-    
+
     if first_word not in matrix or second_word not in matrix:
         return 0
 
     first_dot_second = sum([matrix[first_word][k]*matrix[second_word][k] for k in matrix[first_word] if k in matrix[second_word]]) if len(matrix[first_word])<len(matrix[second_word]) else sum([matrix[first_word][k]*matrix[second_word][k] for k in matrix[second_word] if k in matrix[first_word]])
-    #^ WHAT THE FUCK IS THIS LINE? ^  -Sam 
+    #^ WHAT THE FUCK IS THIS LINE? ^  -Sam
     first_length = math.sqrt(sum(matrix[first_word][k]**2 for k in matrix[first_word]))
     second_length = math.sqrt(sum(matrix[second_word][k]**2 for k in matrix[second_word]))
 
@@ -125,7 +126,7 @@ def summarize_by_word_similarity(sentences, matrix):
     best_sentence_similarity = 0
     best_sentence = ""
     outer_count = 0
-    
+
     for canidate_sentence in sentences:
         print canidate_sentence
         total_similarity = 0
@@ -144,6 +145,9 @@ def summarize_by_word_similarity(sentences, matrix):
 
 def summarize_with_TextRank(sentences, matrix):
     return TextRank.extractSentencesFromSentenceTokens(sentences)
+
+def summarize_with_FrequencySummarizer(sentences, matrix, num_sent=1):
+    return FrequencySummarizer.summarize(sentences, num_sent)
 
 def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=False, summarization_function=summarize_with_TextRank):
     """ Returns an ordered list of the most common dates and a 1 sentence summary
@@ -196,6 +200,6 @@ if __name__ == '__main__':
     fl = open(fn, "w")
     fl.writelines("%s\n" % item for item in select_best_dates('test/', filter_dates=True))
     fl.close()
-    -trying to make it write the output of the function to a file but getting a runtime error. 
+    -trying to make it write the output of the function to a file but getting a runtime error.
     """
-    print select_best_dates('test/', filter_dates=True)
+    print select_best_dates('reuters/', filter_dates=True)
