@@ -185,13 +185,13 @@ def extract_dates(text, base_date):
 
     for sentence in sentences:
         # Removes Tables and sentences that only describe stock movements with numbers
-        if ("       " in sentence or 
-                sentence[0:3] == "Shr" or 
-                sentence[0:9] == "Group shr" or 
-                sentence[0:4] == "Qtly" or 
-                sentence[0:5] == "Qtrly" or 
-                sentence[0:4] == "Oper" or 
-                sentence[0:4] == "Unit" or 
+        if ("       " in sentence or
+                sentence[0:3] == "Shr" or
+                sentence[0:9] == "Group shr" or
+                sentence[0:4] == "Qtly" or
+                sentence[0:5] == "Qtrly" or
+                sentence[0:4] == "Oper" or
+                sentence[0:4] == "Unit" or
                 sentence[0:6].lower() == "reuter"):
             continue
 
@@ -385,6 +385,9 @@ def extract_dates(text, base_date):
             # Substitute tag+timex in the text with grounded tag+timex.
             sentence_with_tags = re.sub('<TIMEX2>' + timex_ori + '</TIMEX2>', '<TIMEX2 val=\"' \
                 + timex_val + '\">' + timex_ori + '</TIMEX2>', sentence)
+
+            sentence_with_tags = re.sub('[\\n]', '', sentence_with_tags)
+            #sentence_with_tags = sentence_with_tags.translate(None, "\\ ")
 
             dates.append((timex_val, sentence_with_tags))
 
