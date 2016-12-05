@@ -187,7 +187,7 @@ def extract_dates(text, base_date):
         # Removes invalid sentences
         if ("       " in sentence or
                 "....." in sentence or
-                "(continued)" in sentence or
+                "(continued)" in sentence.lower() or
                 sentence[0:3] == "Shr" or
                 sentence[0:9] == "Group shr" or
                 sentence[0:4] == "Qtly" or
