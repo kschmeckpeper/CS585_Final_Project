@@ -31,14 +31,15 @@ def read_reuters(path):
 
                 curr_index = curr_file.find("</REUTERS>", curr_index) + 1
 
-                if body_start > curr_index or body_start == -1:
+                if body_start > curr_index or body_start == -1 + 6:
                     continue
 
                 text = curr_file[body_start:body_end]
+
 
                 pairs.append((date, text))
 
     return pairs
 
 if __name__ == '__main__':
-    print read_reuters('reuters')
+    read_reuters('reuters')
