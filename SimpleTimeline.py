@@ -44,8 +44,9 @@ def remove_invalid_dates(should_filter, string, counter):
         counter[string] += 1
     else:
         try:
-            date = int(string[0:4])
-            if date > 1900 and date < 2100:
+            year = int(string[0:4])
+            month = int(string[5:7])
+            if year == 1987 and (month == 3 or month == 4):
                 add_date(string, counter)
         except ValueError:
             pass
@@ -225,8 +226,8 @@ if __name__ == '__main__':
     fl.close()
     -trying to make it write the output of the function to a file but getting a runtime error.
     """
-    count_article_dates('reuters/')
-    print "\n-Article Publication Dates Evaluated-\n"
-    best = select_best_dates('test/', filter_dates=True)
+    # count_article_dates('reuters/')
+    # print "\n-Article Publication Dates Evaluated-\n"
+    best = select_best_dates('reuters/', filter_dates=True)
     for i in range(len(best)):
         print best[i], "\n\n"
