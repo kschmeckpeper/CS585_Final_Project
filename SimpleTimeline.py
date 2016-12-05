@@ -202,4 +202,7 @@ if __name__ == '__main__':
     fl.close()
     -trying to make it write the output of the function to a file but getting a runtime error.
     """
-    print select_best_dates('reuters/', filter_dates=True)
+    best = select_best_dates('reuters/', filter_dates=True)
+    print best
+    for i in range(len(best)):
+        print best[i], "\n\n"

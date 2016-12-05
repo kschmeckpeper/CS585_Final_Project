@@ -184,8 +184,10 @@ def extract_dates(text, base_date):
     sentences = sentence_detector.tokenize(tagged_text.strip())
 
     for sentence in sentences:
-        # Removes Tables and sentences that only describe stock movements with numbers
+        # Removes invalid sentences
         if ("       " in sentence or
+                "....." in sentence or
+                "(continued)" in sentence or
                 sentence[0:3] == "Shr" or
                 sentence[0:9] == "Group shr" or
                 sentence[0:4] == "Qtly" or
@@ -195,6 +197,9 @@ def extract_dates(text, base_date):
                 sentence[0:6].lower() == "reuter"):
             continue
 
+        # Maybe split sentences based on following regex
+        # [a-zA-Z][.][.][.][A-Z]
+        # if ... continues to be a problem
 
         # Find all identified timex and put them into a list
         timex_regex = re.compile(r'<TIMEX2>.*?</TIMEX2>', re.DOTALL)
@@ -251,24 +256,24 @@ def extract_dates(text, base_date):
                 day = hashweekdays[timex.split()[1].lower()]
                 curr_day = base_date.weekday()
                 timex_val = str(base_date + timedelta(days=-7+(day-curr_day)%7))
-                print "Weekdays may not behave as desired"
-                print timex, day, curr_day, base_date, timex_val, (-7+(day-curr_day)%7)
+                # print "Weekdays may not behave as desired"
+                # print timex, day, curr_day, base_date, timex_val, (-7+(day-curr_day)%7)
 
             # Weekday in the current week.
             elif re.match(r'this ' + week_day, timex, re.IGNORECASE):
                 day = hashweekdays[timex.split()[1].lower()]
                 curr_day = base_date.weekday()
                 timex_val = str(base_date + timedelta(days=(day-curr_day)%7))
-                print "Weekdays may not behave as desired"
-                print timex, day, curr_day, base_date, timex_val, ((day-curr_day)%7)
+                # print "Weekdays may not behave as desired"
+                # print timex, day, curr_day, base_date, timex_val, ((day-curr_day)%7)
 
             # Weekday in the following week.
             elif re.match(r'next ' + week_day, timex, re.IGNORECASE):
                 day = hashweekdays[timex.split()[1].lower()]
                 curr_day = base_date.weekday()
                 timex_val = str(base_date + timedelta(days=7+(day-curr_day)%7))
-                print "Weekdays may not behave as desired"
-                print timex, day, curr_day, base_date, timex_val, ((day-curr_day)%7)
+                # print "Weekdays may not behave as desired"
+                # print timex, day, curr_day, base_date, timex_val, ((day-curr_day)%7)
 
             # Last, this, next week.
             elif re.match(r'last week', timex, re.IGNORECASE):
@@ -386,7 +391,7 @@ def extract_dates(text, base_date):
             sentence_with_tags = re.sub('<TIMEX2>' + timex_ori + '</TIMEX2>', '<TIMEX2 val=\"' \
                 + timex_val + '\">' + timex_ori + '</TIMEX2>', sentence)
 
-            sentence_with_tags = re.sub('[\\n]', '', sentence_with_tags)
+            sentence_with_tags = re.sub('[\\n]', ' ', sentence_with_tags)
             #sentence_with_tags = sentence_with_tags.translate(None, "\\ ")
 
             dates.append((timex_val, sentence_with_tags))
