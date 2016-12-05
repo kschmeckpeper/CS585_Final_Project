@@ -214,7 +214,7 @@ def count_article_dates(path):
             count += 1
     ret = sorted(dates.items(), reverse=True, key=operator.itemgetter(1))
     for date in ret:
-        print str(date[0].month)+"-"+str(date[0].day)+"-"+str(date[0].year)+", "+str(date[1])+", "+str(date[1]/float(count))
+        print str(date[0].month)+"/"+str(date[0].day)+"/"+str(date[0].year)+", "+str(date[1])+", "+str(date[1]/float(count))
     
     return ret
         
