@@ -3,6 +3,7 @@ from collections import Counter
 from collections import defaultdict
 from time import gmtime, strftime
 import DateArticlePair
+import operator
 import timex
 import re
 from nltk.tokenize import word_tokenize
@@ -194,6 +195,28 @@ def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=Fal
 
     return date_with_summarization
 
+def count_article_dates(path):
+    """
+    Prints a list of dates lead by the most common dates, and features the % 
+    of articles written on that date relative to all articles written, given a
+    particular path to articles.
+    
+    Returns this list, but with only the dates/counts of those dates; the %
+    calculation is done in-method.
+    """
+    
+    dates = dict()
+    count = 0
+    for (article_date, article_text) in DateArticlePair.read_reuters(path):
+        if article_date.year > 1000 and article_date.year < 2100:
+            dates[article_date] = dates.get(article_date, 0) + 1
+            count += 1
+    ret = sorted(dates.items(), reverse=True, key=operator.itemgetter(1))
+    for date in ret:
+        print str(date[0].month)+"-"+str(date[0].day)+"-"+str(date[0].year)+", "+str(date[1])+", "+str(date[1]/float(count))
+    
+    return ret
+        
 if __name__ == '__main__':
     """
     fn = strftime("%H-%M-%S-%d%b%Y")+ "_output.txt"
@@ -202,6 +225,8 @@ if __name__ == '__main__':
     fl.close()
     -trying to make it write the output of the function to a file but getting a runtime error.
     """
-    best = select_best_dates('reuters/', filter_dates=True)
+    count_article_dates('reuters/')
+    print "\n-Article Publication Dates Evaluated-\n"
+    best = select_best_dates('test/', filter_dates=True)
     for i in range(len(best)):
         print best[i], "\n\n"
