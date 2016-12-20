@@ -19,13 +19,16 @@ def read_reuters(path):
             curr_file = open(path + os.path.sep + filename).read().strip()
 
             curr_index = 0
+            #find beginning of the article
             while curr_file.find("<REUTERS", curr_index) != -1:
+                #find the beginning and end of the date for the article
                 date_start = curr_file.find("<DATE>", curr_index)
                 date_start = curr_file.find(">", date_start) + 1
                 date_end = date_start + 11
                 date_string = curr_file[date_start:date_end]
                 date = parse(date_string)
 
+                #find the start and end of the event information
                 body_start = curr_file.find("<BODY>", curr_index) + 6
                 body_end = curr_file.find("</BODY>", curr_index)
 

@@ -66,13 +66,16 @@ def count_word_word_matrix(corpus, dist=7):
         for count in range(len(tokens)):
             word = tokens[count].lower()
 
+            #check to see if the current word is a number
             if bool(is_number.search(word)):
                 word = "<NUMBER>"
 
+            #if word is not currently in the matrix, create a defaultdict for it
             if word not in matrix:
                 matrix[word] = defaultdict(int)
             high = count+dist
             tmp = count-dist
+            #checks to see if outside token array
             if tmp < 0:
                 matrix[word][" "] -= tmp
             matrix[word][" "] += (high - len(tokens)) + 1
@@ -85,6 +88,10 @@ def count_word_word_matrix(corpus, dist=7):
     return matrix
 
 def calc_word_similarity(first_word, second_word, matrix):
+    ''' Returns the cosine similarity between the two words
+    Value should be between 0 and 1
+    '''
+
     first_word = first_word.lower()
     second_word = second_word.lower()
 
@@ -92,7 +99,7 @@ def calc_word_similarity(first_word, second_word, matrix):
         return 0
 
     first_dot_second = sum([matrix[first_word][k]*matrix[second_word][k] for k in matrix[first_word] if k in matrix[second_word]]) if len(matrix[first_word])<len(matrix[second_word]) else sum([matrix[first_word][k]*matrix[second_word][k] for k in matrix[second_word] if k in matrix[first_word]])
-    #^ WHAT THE FUCK IS THIS LINE? ^  -Sam
+
     first_length = math.sqrt(sum(matrix[first_word][k]**2 for k in matrix[first_word]))
     second_length = math.sqrt(sum(matrix[second_word][k]**2 for k in matrix[second_word]))
 
@@ -107,6 +114,11 @@ def calc_word_similarity(first_word, second_word, matrix):
     return first_dot_second / (first_length * second_length)
 
 def calc_sentence_similarity(first_sentence, second_sentence, matrix):
+    ''' Calulates the total similarity based on the best word similarity from
+    pass through. Returns the total similary divided by the length of the
+    number of tokens in the first sentence
+    '''
+
     first_tokens = word_tokenize(first_sentence)
     second_tokens = word_tokenize(second_sentence)
 
@@ -124,24 +136,28 @@ def calc_sentence_similarity(first_sentence, second_sentence, matrix):
     return total_similarity / len(first_tokens)
 
 def summarize_by_word_similarity(sentences, matrix):
+    ''' Returns the best sentence to summarize the text by calculating the
+    sentence similarity when comparing every sentence to one another
+    '''
 
     best_sentence_similarity = 0
     best_sentence = ""
     outer_count = 0
 
     for canidate_sentence in sentences:
-        print canidate_sentence
+        #print canidate_sentence
         total_similarity = 0
         count = 0
         for sentence in sentences:
             total_similarity += calc_sentence_similarity(canidate_sentence, sentence, matrix)
             count += 1
-            print "Checked ", count, "/", len(sentences)
+            #print "Checked ", count, "/", len(sentences)
 
         if total_similarity > best_sentence_similarity:
             best_sentence = canidate_sentence
             best_sentence_similarity = total_similarity
-        print "Outer count ", outer_count, "/", len(sentences)
+        outer_count += 1
+        #print "Outer count ", outer_count, "/", len(sentences)
 
     return best_sentence
 
@@ -165,15 +181,18 @@ def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=Fal
     print "Articles read"
 
     matrix = []
+    #updates the matrix if summarizing through word similarity
     if summarization_function == summarize_by_word_similarity:
         matrix = count_word_word_matrix(date_article_pairs)
     date_counter = Counter()
 
     sentence_list = {}
 
+    #gets date references
     for (article_date, article_text) in date_article_pairs:
         date_sentence_pairs = timex.extract_dates(article_text, article_date)
 
+        #remove invalid dates based on flags
         if use_article_date == 2 or (use_article_date == 1 and len(date_sentence_pairs) == 0):
             remove_invalid_dates(filter_dates, "%s" % (article_date.date()), date_counter)
 
@@ -191,21 +210,21 @@ def select_best_dates(path, num_dates=None, use_article_date=1, filter_dates=Fal
     date_with_summarization = []
 
     for date in dates_to_return:
-        print date
+        #print date
         date_with_summarization.append((date[0], date[1], summarization_function(sentence_list[date[0]], matrix)))
 
     return date_with_summarization
 
 def count_article_dates(path):
     """
-    Prints a list of dates lead by the most common dates, and features the % 
+    Prints a list of dates lead by the most common dates, and features the %
     of articles written on that date relative to all articles written, given a
     particular path to articles.
-    
+
     Returns this list, but with only the dates/counts of those dates; the %
     calculation is done in-method.
     """
-    
+
     dates = dict()
     count = 0
     for (article_date, article_text) in DateArticlePair.read_reuters(path):
@@ -215,9 +234,9 @@ def count_article_dates(path):
     ret = sorted(dates.items(), reverse=True, key=operator.itemgetter(1))
     for date in ret:
         print str(date[0].month)+"/"+str(date[0].day)+"/"+str(date[0].year)+", "+str(date[1])+", "+str(date[1]/float(count))
-    
+
     return ret
-        
+
 if __name__ == '__main__':
     """
     fn = strftime("%H-%M-%S-%d%b%Y")+ "_output.txt"
