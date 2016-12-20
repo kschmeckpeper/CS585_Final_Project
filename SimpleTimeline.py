@@ -98,6 +98,8 @@ def calc_word_similarity(first_word, second_word, matrix):
     if first_word not in matrix or second_word not in matrix:
         return 0
 
+    # Exploits python iteration operations for speed up
+    # Logically the same as the following six lines of commented code
     first_dot_second = sum([matrix[first_word][k]*matrix[second_word][k] for k in matrix[first_word] if k in matrix[second_word]]) if len(matrix[first_word])<len(matrix[second_word]) else sum([matrix[first_word][k]*matrix[second_word][k] for k in matrix[second_word] if k in matrix[first_word]])
 
     first_length = math.sqrt(sum(matrix[first_word][k]**2 for k in matrix[first_word]))
